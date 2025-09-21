@@ -18,8 +18,8 @@
   .cloud4{width:90px;height:45px;top:6%;left:85%;animation-delay:-15s}
   @keyframes cloudFloat{0%{transform:translateX(0)}100%{transform:translateX(-100px)}}
 
-  /* Blocks / pipes / bushes / trees (obstacles are "solid") */
-  .brick-block,.pipe,.bush,.mario-tree,.tree,.goomba{pointer-events:none} /* visual only; collisions handled in JS */
+  /* Blocks / pipes / bushes / trees */
+  .brick-block,.pipe,.bush,.mario-tree,.tree,.goomba{pointer-events:none}
   .brick-block{position:absolute;width:40px;height:40px;background:#D2691E;border:2px solid #8B4513;
     background-image:linear-gradient(45deg,#CD853F 25%,transparent 25%),linear-gradient(-45deg,#CD853F 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#CD853F 75%),linear-gradient(-45deg,transparent 75%,#CD853F 75%);
     background-size:8px 8px}
@@ -49,9 +49,9 @@
 
   /* UI Overlay */
   .ui-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000}
-  .ui-header{position:absolute;top:20px;left:20px;color:#fff;text-shadow:3px 3px 0 #000;pointer-events:all}
-  .ui-title{font-size:2rem;font-weight:bold;margin-bottom:5px}
-  .ui-subtitle{font-size:1.1rem;opacity:.9}
+  .ui-header{position:absolute;top:20px;left:20px;color:#fff;text-shadow:3px 3px 0 #000;pointer-events:all;max-width:75vw}
+  .ui-title{font-size:2rem;font-weight:bold;margin-bottom:5px;line-height:1.1}
+  .ui-subtitle{font-size:1.1rem;opacity:.9;line-height:1.1;word-break:break-word}
   .menu-buttons{position:absolute;top:20px;right:20px;display:flex;gap:15px;pointer-events:all}
   .menu-btn{background:#4169E1;color:#fff;border:3px solid #fff;padding:12px 20px;font-family:'Courier New',monospace;font-size:1rem;font-weight:bold;cursor:pointer;border-radius:8px;transition:.2s}
   .menu-btn:hover{background:#FF6B35;transform:scale(1.05)}
@@ -79,7 +79,7 @@
   .computer{width:50px;height:40px;background:#696969;border:3px solid #000;border-radius:8px;position:relative}
   .computer::before{content:'💻';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px}
 
-  /* Social icons (fixed in-world + always-visible header) */
+  /* Social icons (in-world) */
   .social-icon{width:45px;height:45px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:bold;border:3px solid #fff;position:relative}
   .social-icon::after{content:attr(data-name);position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:#fff;text-shadow:1px 1px 0 #000;white-space:nowrap}
   .instagram{background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)}
@@ -90,10 +90,10 @@
 
   .controls-help{position:absolute;bottom:20px;right:20px;background:rgba(0,0,0,.8);color:#fff;padding:20px;border-radius:12px;font-size:1rem;pointer-events:all;border:2px solid #4169E1}
   .mobile-controls{position:fixed;bottom:20px;left:20px;display:none;pointer-events:all;z-index:1001}
-  .mobile-dpad{position:relative;width:120px;height:120px}
-  .mobile-btn{position:absolute;width:40px;height:40px;background:rgba(65,105,225,.8);border:2px solid #fff;border-radius:8px;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:center}
-  .mobile-btn:active{background:rgba(255,107,53,.8);transform:scale(.95)}
-  .btn-up{top:0;left:40px}.btn-down{bottom:0;left:40px}.btn-left{top:40px;left:0}.btn-right{top:40px;right:0}
+  .mobile-dpad{position:relative;width:140px;height:140px}
+  .mobile-btn{position:absolute;width:56px;height:56px;background:rgba(65,105,225,.9);border:2px solid #fff;border-radius:10px;color:#fff;font-size:20px;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:center}
+  .mobile-btn:active{background:rgba(255,107,53,.9);transform:scale(.95)}
+  .btn-up{top:0;left:42px}.btn-down{bottom:0;left:42px}.btn-left{top:42px;left:0}.btn-right{top:42px;right:0}
 
   .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:1000;display:none;align-items:center;justify-content:center;pointer-events:all}
   .modal.active{display:flex;animation:fadeIn .3s ease}
@@ -111,387 +111,7 @@
   .hud{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;border:2px solid #fff;border-radius:10px;padding:8px 14px;pointer-events:all}
 
   @media (max-width:768px){
-    .mobile-controls{display:block}
-    .controls-help{display:none}
-    .ui-title{font-size:1.5rem}.ui-subtitle{font-size:1rem}
-    .menu-btn{font-size:.9rem;padding:10px 15px}
-    .dialogue-box{width:95%;font-size:1rem;padding:20px}
-    .cv-content,.about-content{padding:25px}
-  }
-</style>
-</head>
-<body>
-  <div class="game-screen">
-    <div class="game-world" id="gameWorld">
-      <!-- clouds -->
-      <div class="cloud cloud1"></div><div class="cloud cloud2"></div><div class="cloud cloud3"></div><div class="cloud cloud4"></div>
-
-      <!-- blocks -->
-      <div class="brick-block" style="left:200px;top:400px"></div>
-      <div class="brick-block" style="left:240px;top:400px"></div>
-      <div class="brick-block" style="left:280px;top:400px"></div>
-      <div class="question-block" style="left:320px;top:360px">?</div>
-      <div class="brick-block" style="left:360px;top:400px"></div>
-
-      <div class="brick-block" style="left:800px;top:500px"></div>
-      <div class="question-block" style="left:840px;top:460px">?</div>
-      <div class="brick-block" style="left:880px;top:500px"></div>
-
-      <!-- pipes -->
-      <div class="pipe pipe-small" style="left:150px;top:650px"></div>
-      <div class="pipe pipe-medium" style="left:600px;top:610px"></div>
-      <div class="pipe pipe-large" style="left:1100px;top:570px"></div>
-
-      <!-- bushes/trees -->
-      <div class="bush" style="left:100px;top:680px"></div>
-      <div class="bush" style="left:400px;top:680px"></div>
-      <div class="bush" style="left:900px;top:680px"></div>
-      <div class="mario-tree" style="left:50px;top:640px"></div>
-      <div class="mario-tree" style="left:750px;top:640px"></div>
-      <div class="mario-tree" style="left:1200px;top:640px"></div>
-
-      <!-- coins -->
-      <div class="coin" style="left:250px;top:300px">€</div>
-      <div class="coin" style="left:300px;top:250px">€</div>
-      <div class="coin" style="left:350px;top:300px">€</div>
-      <div class="coin" style="left:650px;top:400px">€</div>
-      <div class="coin" style="left:950px;top:350px">€</div>
-
-      <!-- goombas -->
-      <div class="goomba" style="left:500px;top:670px"></div>
-      <div class="goomba" style="left:1000px;top:670px"></div>
-
-      <!-- flowers -->
-      <div class="super-flower" style="left:80px;top:600px"></div>
-      <div class="super-flower" style="left:450px;top:600px"></div>
-      <div class="super-flower" style="left:800px;top:600px"></div>
-      <div class="super-flower" style="left:1150px;top:600px"></div>
-
-      <!-- Character -->
-      <div class="character" id="character" style="left:300px;top:500px">
-        <div class="character-hat"></div>
-        <div class="character-body">
-          <div class="character-face">
-            <div class="character-eyes"></div>
-            <div class="character-mouth"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Interactive Objects -->
-      <div class="interactive-object computer" id="cvComputer" style="left:400px;top:300px" data-type="cv" title="Open CV"></div>
-
-      <!-- Social media totems (in-world) -->
-      <div class="social-media-zone" style="position:absolute;left:950px;top:150px;width:200px">
-        <a class="interactive-object social-icon instagram" data-type="social" data-platform="instagram" data-name="INSTAGRAM" style="position:relative;left:0;top:0;margin-bottom:20px"></a>
-        <a class="interactive-object social-icon tiktok" data-type="social" data-platform="tiktok" data-name="TIKTOK" style="position:relative;left:60px;top:-65px;margin-bottom:20px"></a>
-        <a class="interactive-object social-icon linkedin" data-type="social" data-platform="linkedin" data-name="LINKEDIN" style="position:relative;left:120px;top:-130px;margin-bottom:20px"></a>
-      </div>
-
-      <!-- About tree -->
-      <div class="interactive-object tree" id="aboutTree" style="left:1000px;top:500px" data-type="about" title="About Ali"></div>
-    </div>
-
-    <!-- UI overlay -->
-    <div class="ui-overlay">
-      <div class="ui-header">
-        <div class="ui-title">ALI KHAQAN</div>
-        <div class="ui-subtitle">STRATEGIC PORTFOLIO WORLD</div>
-      </div>
-
-      <!-- HUD coin counter -->
-      <div class="hud" id="coinHud">Coins: <span id="coinCount">0</span></div>
-
-      <div class="menu-buttons">
-        <button class="menu-btn" id="menuBtn">📋 MENU</button>
-        <button class="menu-btn" id="mapBtn">❓ HELP</button>
-      </div>
-
-      <div class="controls-help" id="controlsHelp">
-        <div><strong>🎮 CONTROLS:</strong></div>
-        <div><strong>Arrow Keys ←↑↓→</strong> - Move around</div>
-        <div><strong>Click objects</strong> - Interact</div>
-        <div><strong>ESC</strong> - Close windows</div>
-        <div><strong>💡 Tip:</strong> Get close for easier interaction!</div>
-      </div>
-
-      <!-- Mobile controls -->
-      <div class="mobile-controls" id="mobileControls">
-        <div class="mobile-dpad">
-          <div class="mobile-btn btn-up" data-direction="up">↑</div>
-          <div class="mobile-btn btn-down" data-direction="down">↓</div>
-          <div class="mobile-btn btn-left" data-direction="left">←</div>
-          <div class="mobile-btn btn-right" data-direction="right">→</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dialogue -->
-    <div class="dialogue-box" id="dialogueBox">
-      <div class="dialogue-text" id="dialogueText"></div>
-      <div class="dialogue-options" id="dialogueOptions"></div>
-    </div>
-  </div>
-
-  <!-- CV Modal -->
-  <div class="modal" id="cvModal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeModal('cvModal')">&times;</span>
-      <div class="cv-content">
-        <div class="cv-header">
-          <img src="IMG_8843.jpg" alt="Ali Khaqan" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #4169E1;margin-bottom:10px;">
-          <h1>Ali Khaqan</h1>
-          <h2>Strategic Assistant to the CEO | ESG, AI & Analytics</h2>
-          <p>📧 <a href="mailto:alikhaqan22@gmail.com">alikhaqan22@gmail.com</a> | 📱 +49 176 7619 4593 | 📍 Künzelsau, Germany</p>
-          <p>🌐 LinkedIn: <a href="https://www.linkedin.com/in/ali-khaqan/" target="_blank" rel="noopener">linkedin.com/in/ali-khaqan</a> | 📸 Instagram: <a href="https://instagram.com/itsalikhaqan" target="_blank" rel="noopener">@itsalikhaqan</a> | 🎵 TikTok: <a href="https://tiktok.com/@itsalikhaqan" target="_blank" rel="noopener">@itsalikhaqan</a></p>
-          <p><strong>Status:</strong> Pakistani with German PR (Niederlassungserlaubnis)</p>
-          <p><strong>Languages:</strong> English (Fluent), German (B1 — improving thanks to my wife, a native German speaker)</p>
-          <p><a href="Ali_CV_2025.pdf" download>⬇️ Download full CV (PDF)</a></p>
-        </div>
-
-        <div class="cv-section">
-          <h3>🎯 Professional Summary</h3>
-          <p>I work at the crossroads of ESG, AI, and compliance — helping connect big-picture strategy with execution in manufacturing and automotive electronics. My focus is on turning complex challenges into clear results, building strong teams, and driving sustainable growth. Outside of work, I share my journey as an international living in Germany — from gym routines to daily habits — showing how discipline, balance, and consistency shape both professional and personal success.</p>
-        </div>
-
-        <!-- (You can keep adding experience, awards, and skills here as you like) -->
-      </div>
-    </div>
-  </div>
-
-  <!-- About Modal (opens from MENU and Tree) -->
-  <div class="modal" id="aboutModal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeModal('aboutModal')">&times;</span>
-      <div class="about-content">
-        <h2 style="margin-bottom:10px;color:#4169E1">About Ali</h2>
-        <p>Hey! I’m Ali Khaqan — a strategy-minded operator working at the intersection of leadership, ESG, analytics, and product execution. Outside work I’m a gym enthusiast and create content aimed at <strong>motivating teens and students</strong> to build strong habits. I share simple training tips, routines, and mindset notes on Instagram/TikTok to help kids start smart and stay consistent.</p>
-        <p>I love mentoring, simplifying complex topics, and turning ideas into systems. If you’d like advice on breaking into tech/ops, building a training routine, or navigating early career choices — reach out!</p>
-        <p style="margin-top:10px">📧 <a href="mailto:alikhaqan22@gmail.com">alikhaqan22@gmail.com</a> · 💬 <a href="https://instagram.com/itsalikhaqan" target="_blank" rel="noopener">@itsalikhaqan</a></p>
-      </div>
-    </div>
-  </div>
-
-<script>
-/* ====================== GAME STATE ====================== */
-let gameState = {
-  character: { x:300, y:500, speed:5 },
-  camera: { x:0, y:0 },
-  world: { width:1600, height:1000 },
-  screen: { width:window.innerWidth, height:window.innerHeight },
-  keys: {},
-  dialogueActive:false,
-  coins:0
-};
-
-/* ====================== INIT ====================== */
-document.addEventListener('DOMContentLoaded', () => {
-  gameState.screen.width = window.innerWidth;
-  gameState.screen.height = window.innerHeight;
-
-  // Inputs
-  document.addEventListener('keydown', handleKeyDown);
-  document.addEventListener('keyup', handleKeyUp);
-  document.getElementById('menuBtn').addEventListener('click', showMenu);
-  document.getElementById('mapBtn').addEventListener('click', showHelp);
-  window.addEventListener('resize', () => {
-    gameState.screen.width = window.innerWidth;
-    gameState.screen.height = window.innerHeight;
-  });
-
-  // Mobile
-  document.querySelectorAll('.mobile-btn').forEach(btn=>{
-    btn.addEventListener('touchstart', handleMobileInput);
-    btn.addEventListener('mousedown', handleMobileInput);
-  });
-
-  // Interactive objects
-  document.querySelectorAll('.interactive-object').forEach(obj=>{
-    obj.addEventListener('click', handleObjectClick);
-  });
-
-  // Start loop
-  updateCamera();
-  requestAnimationFrame(gameLoop);
-});
-
-/* ====================== INPUT ====================== */
-function handleKeyDown(e){
-  gameState.keys[e.key] = true;
-  if(e.key==='Escape') closeAllModals();
-}
-function handleKeyUp(e){ gameState.keys[e.key] = false; }
-function handleMobileInput(e){
-  e.preventDefault();
-  const dir = e.target.dataset.direction;
-  moveCharacter(dir);
-}
-
-/* ====================== MOVEMENT ====================== */
-function updateCharacter(){
-  if (gameState.dialogueActive) return;
-
-  const c = gameState.character;
-  const prev = {x:c.x, y:c.y};
-
-  if (gameState.keys['ArrowLeft']||gameState.keys['a']||gameState.keys['A']) c.x = Math.max(0, c.x - c.speed);
-  if (gameState.keys['ArrowRight']||gameState.keys['d']||gameState.keys['D']) c.x = Math.min(gameState.world.width-40, c.x + c.speed);
-  if (gameState.keys['ArrowUp']||gameState.keys['w']||gameState.keys['W']) c.y = Math.max(0, c.y - c.speed);
-  if (gameState.keys['ArrowDown']||gameState.keys['s']||gameState.keys['S']) c.y = Math.min(gameState.world.height-48, c.y + c.speed);
-
-  // Simple collision against a few static obstacles (pipes/blocks/bushes/trees/goombas)
-  const solids = Array.from(document.querySelectorAll('.pipe,.brick-block,.bush,.mario-tree,.tree,.goomba'));
-  if (solids.some(el => isOverlapById('character', el))) { c.x = prev.x; c.y = prev.y; }
-
-  // Move & camera
-  updateCharacterPosition();
-  updateCamera();
-
-  // Coins
-  checkCoinPickup();
-}
-function moveCharacter(direction){
-  if (gameState.dialogueActive) return;
-  const c = gameState.character;
-  const step = c.speed*2;
-  const prev = {x:c.x, y:c.y};
-  if(direction==='left') c.x = Math.max(0,c.x-step);
-  if(direction==='right') c.x = Math.min(gameState.world.width-40,c.x+step);
-  if(direction==='up') c.y = Math.max(0,c.y-step);
-  if(direction==='down') c.y = Math.min(gameState.world.height-48,c.y+step);
-
-  const solids = Array.from(document.querySelectorAll('.pipe,.brick-block,.bush,.mario-tree,.tree,.goomba'));
-  if (solids.some(el => isOverlapById('character', el))) { c.x = prev.x; c.y = prev.y; }
-
-  updateCharacterPosition();
-  updateCamera();
-}
-function updateCharacterPosition(){
-  const el = document.getElementById('character');
-  el.style.left = gameState.character.x + 'px';
-  el.style.top  = gameState.character.y + 'px';
-}
-function updateCamera(){
-  const c = gameState.character, s = gameState.screen;
-  gameState.camera.x = Math.max(0, Math.min(gameState.world.width - s.width,  c.x - s.width/2));
-  gameState.camera.y = Math.max(0, Math.min(gameState.world.height - s.height, c.y - s.height/2));
-  document.getElementById('gameWorld').style.transform = `translate(-${gameState.camera.x}px, -${gameState.camera.y}px)`;
-}
-
-/* ====================== UTILS ====================== */
-function rect(el){ return el.getBoundingClientRect(); }
-function isOverlapById(id, el2){
-  const r1 = rect(document.getElementById(id));
-  const r2 = rect(el2);
-  return !(r1.right<r2.left || r1.left>r2.right || r1.bottom<r2.top || r1.top>r2.bottom);
-}
-
-/* ====================== INTERACTION ====================== */
-function handleObjectClick(e){
-  const obj = e.currentTarget;
-  const type = obj.dataset.type;
-
-  // Always allow About to open (no distance gating)
-  if (type === 'about') { openModal('aboutModal'); return; }
-
-  // Proximity for others
-  const distance = (() => {
-    const a = rect(obj), b = rect(document.getElementById('character'));
-    return Math.hypot(a.left - b.left, a.top - b.top);
-  })();
-  if (distance > 150 && type!=='about') {
-    showDialogue("I need to get closer to interact with this!", []);
-    return;
-  }
-
-  if (type==='cv') openModal('cvModal');
-  if (type==='social') handleSocialClick(obj.dataset.platform);
-}
-
-/* ====================== DIALOGUES/MODALS ====================== */
-function showDialogue(text, options=[]){
-  gameState.dialogueActive = true;
-  document.getElementById('dialogueText').innerHTML = text;
-  const opt = document.getElementById('dialogueOptions');
-  opt.innerHTML='';
-  (options.length?options:[{text:'Close',action:closeDialogue}]).forEach(o=>{
-    const b = document.createElement('div');
-    b.className='dialogue-option';
-    b.textContent=o.text;
-    b.onclick=o.action;
-    opt.appendChild(b);
-  });
-  document.getElementById('dialogueBox').classList.add('active');
-  hideControls(true);
-}
-function closeDialogue(){
-  gameState.dialogueActive=false;
-  document.getElementById('dialogueBox').classList.remove('active');
-  hideControls(false);
-}
-function openModal(id){
-  closeDialogue();
-  document.getElementById(id).classList.add('active');
-  hideControls(true);
-}
-function closeModal(id){
-  document.getElementById(id).classList.remove('active');
-  hideControls(false);
-}
-function closeAllModals(){
-  document.querySelectorAll('.modal').forEach(m=>m.classList.remove('active'));
-  closeDialogue();
-}
-function showMenu(){
-  showDialogue("🎮 GAME MENU - Navigate Ali's professional world!",[
-    {text:"💻 View CV/Resume", action:()=>{closeDialogue();openModal('cvModal');}},
-    {text:"🌳 About Ali",       action:()=>{closeDialogue();openModal('aboutModal');}},
-    {text:"📱 Social Profiles", action:()=>{closeDialogue();showDialogue("Choose a profile:",[
-      {text:"Instagram", action:()=>{handleSocialClick('instagram');}},
-      {text:"TikTok", action:()=>{handleSocialClick('tiktok');}},
-      {text:"LinkedIn", action:()=>{handleSocialClick('linkedin');}}
-    ])}}
-  ]);
-}
-function showHelp(){
-  showDialogue("🎮 HOW TO PLAY:<br><br>• Use arrow keys or mobile controls to move<br>• Click objects when you're close<br>• 💻 Computer = CV/Resume<br>• 🌳 Tree = About Ali<br>• 📱 Icons = My socials<br><br>Collect coins and explore!");
-}
-function handleSocialClick(platform){
-  const urls = {
-    instagram:'https://instagram.com/itsalikhaqan',
-    tiktok:'https://tiktok.com/@itsalikhaqan',
-    linkedin:'https://www.linkedin.com/in/ali-khaqan/'
-  };
-  showDialogue(`Opening ${platform.toUpperCase()}...`,[
-    {text:`Visit ${platform.toUpperCase()}`,action:()=>{window.open(urls[platform],'_blank');closeDialogue();}},
-    {text:"Close",action:closeDialogue}
-  ]);
-}
-function hideControls(hide){
-  const m = document.getElementById('mobileControls');
-  const c = document.getElementById('controlsHelp');
-  if (hide){ m.style.display='none'; c.style.visibility='hidden'; }
-  else {
-    if (window.innerWidth<=768) m.style.display='block';
-    c.style.visibility='visible';
-  }
-}
-
-/* ====================== COINS ====================== */
-function checkCoinPickup(){
-  const coins = Array.from(document.querySelectorAll('.coin'));
-  coins.forEach(coin=>{
-    if (!coin.dataset.taken && isOverlapById('character', coin)){
-      coin.dataset.taken='1';
-      coin.style.visibility='hidden';
-      gameState.coins++;
-      document.getElementById('coinCount').textContent = gameState.coins;
-    }
-  });
-}
-
-/* ====================== LOOP ====================== */
-function gameLoop(){ updateCharacter(); requestAnimationFrame(gameLoop); }
-</script>
-</body>
-</html>
+    .ui-header{top:14px;left:14px;max-width:70vw}
+    .ui-title{font-size:1.35rem}
+    .ui-subtitle{font-size:.95rem}
+    .menu-buttons{top:auto;right:auto;bottom:18px;left:50%

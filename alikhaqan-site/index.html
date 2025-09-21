@@ -37,7 +37,7 @@
   .coin{position:absolute;width:25px;height:25px;background:#FFD700;border:2px solid #FFA500;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;color:#FF8C00;animation:coinSpin 2s linear infinite}
   @keyframes coinSpin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
 
-  /* Goombas (decorative) */
+  /* Goombas */
   .goomba{position:absolute;width:30px;height:30px;background:#8B4513;border-radius:50% 50% 0 0;border:2px solid #654321;animation:goombaWalk 3s ease-in-out infinite}
   .goomba::before{content:'• •';position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#000}
   @keyframes goombaWalk{0%,100%{transform:translateX(0)}50%{transform:translateX(20px)}}
@@ -47,10 +47,10 @@
   .super-flower::before{content:'🌸';font-size:25px;position:absolute;top:0;left:0}
   @keyframes flowerSway{0%,100%{transform:rotate(0)}50%{transform:rotate(10deg)}}
 
-  /* UI Overlay */
-  .ui-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000}
-  .ui-header{position:absolute;top:20px;left:20px;color:#fff;text-shadow:3px 3px 0 #000;pointer-events:all;max-width:75vw}
-  .ui-title{font-size:2rem;font-weight:bold;margin-bottom:5px;line-height:1.1}
+  /* UI Overlay (respect iOS safe area) */
+  .ui-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;padding-top:env(safe-area-inset-top)}
+  .ui-header{position:absolute;top:calc(14px + env(safe-area-inset-top));left:14px;color:#fff;text-shadow:3px 3px 0 #000;pointer-events:all;max-width:75vw}
+  .ui-title{font-size:2rem;font-weight:bold;margin-bottom:4px;line-height:1.1}
   .ui-subtitle{font-size:1.1rem;opacity:.9;line-height:1.1;word-break:break-word}
   .menu-buttons{position:absolute;top:20px;right:20px;display:flex;gap:15px;pointer-events:all}
   .menu-btn{background:#4169E1;color:#fff;border:3px solid #fff;padding:12px 20px;font-family:'Courier New',monospace;font-size:1rem;font-weight:bold;cursor:pointer;border-radius:8px;transition:.2s}
@@ -68,6 +68,8 @@
   /* Dialogue / Modals */
   .dialogue-box{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);width:85%;max-width:700px;background:rgba(255,255,255,.95);border:4px solid #000;border-radius:15px;padding:25px;font-size:1.1rem;z-index:200;display:none;pointer-events:all;box-shadow:0 10px 30px rgba(0,0,0,.5)}
   .dialogue-box.active{display:block;animation:slideUp .3s ease}
+  .dialogue-close{position:absolute;top:8px;right:10px;width:32px;height:32px;border:none;border-radius:8px;background:#eee;cursor:pointer;font-weight:bold;font-size:1.2rem;line-height:1}
+  .dialogue-close:hover{background:#ffd8d8}
   @keyframes slideUp{from{transform:translateX(-50%) translateY(100px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
   .dialogue-text{margin-bottom:20px;line-height:1.5;color:#333}
   .dialogue-options{display:flex;gap:15px;flex-wrap:wrap;justify-content:center}
@@ -79,7 +81,7 @@
   .computer{width:50px;height:40px;background:#696969;border:3px solid #000;border-radius:8px;position:relative}
   .computer::before{content:'💻';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px}
 
-  /* Social icons (in-world) */
+  /* Social icons */
   .social-icon{width:45px;height:45px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:bold;border:3px solid #fff;position:relative}
   .social-icon::after{content:attr(data-name);position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:#fff;text-shadow:1px 1px 0 #000;white-space:nowrap}
   .instagram{background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)}
@@ -89,7 +91,7 @@
   .tree::before{content:'🌳';position:absolute;top:-35px;left:50%;transform:translateX(-50%);font-size:40px}
 
   .controls-help{position:absolute;bottom:20px;right:20px;background:rgba(0,0,0,.8);color:#fff;padding:20px;border-radius:12px;font-size:1rem;pointer-events:all;border:2px solid #4169E1}
-  .mobile-controls{position:fixed;bottom:20px;left:20px;display:none;pointer-events:all;z-index:1001}
+  .mobile-controls{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom));left:16px;display:none;pointer-events:all;z-index:1001}
   .mobile-dpad{position:relative;width:140px;height:140px}
   .mobile-btn{position:absolute;width:56px;height:56px;background:rgba(65,105,225,.9);border:2px solid #fff;border-radius:10px;color:#fff;font-size:20px;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:center}
   .mobile-btn:active{background:rgba(255,107,53,.9);transform:scale(.95)}
@@ -108,17 +110,20 @@
   .experience-item{margin-bottom:15px;padding:15px;background:#fff;border-radius:8px;border:1px solid #ddd}
 
   /* HUD coin counter */
-  .hud{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;border:2px solid #fff;border-radius:10px;padding:8px 14px;pointer-events:all}
+  .hud{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;border:2px solid #fff;border-radius:10px;padding:8px 14px;pointer-events:all;z-index:1001}
 
   @media (max-width:768px){
-    .ui-header{top:14px;left:14px;max-width:70vw}
-    .ui-title{font-size:1.35rem}
+    .ui-header{top:calc(10px + env(safe-area-inset-top));left:12px;max-width:70vw}
+    .ui-title{font-size:1.3rem}
     .ui-subtitle{font-size:.95rem}
-    .menu-buttons{top:auto;right:auto;bottom:18px;left:50%;transform:translateX(-50%);gap:10px;z-index:1002}
+    /* Move menu buttons to bottom center on phones */
+    .menu-buttons{top:auto;right:auto;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);gap:10px;z-index:1002}
     .menu-btn{font-size:1rem;padding:12px 16px}
+    /* HUD to top-right so it doesn't cover the name */
+    .hud{top:calc(10px + env(safe-area-inset-top));right:12px;left:auto;transform:none}
     .mobile-controls{display:block}
     .controls-help{display:none}
-    .dialogue-box{width:95%;font-size:1rem;padding:20px}
+    .dialogue-box{width:95%;font-size:1rem;padding:20px;bottom:calc(80px + env(safe-area-inset-bottom))}
     .cv-content,.about-content{padding:25px}
   }
 </style>
@@ -184,24 +189,19 @@
       <!-- Interactive Objects -->
       <div class="interactive-object computer" id="cvComputer" style="left:400px;top:300px" data-type="cv" title="Open CV"></div>
 
-      <!-- Social media totems (in-world) -->
+      <!-- Social media totems (with visible SVG icons) -->
       <div class="social-media-zone" style="position:absolute;left:950px;top:150px;width:200px">
         <a class="interactive-object social-icon instagram" data-type="social" data-platform="instagram" data-name="INSTAGRAM" aria-label="Instagram" style="position:relative;left:0;top:0;margin-bottom:20px">
-          <!-- Instagram SVG -->
           <svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true">
             <path d="M12 2.2c3.2 0 3.6.01 4.9.07 3.2.15 4.77 1.69 4.92 4.92.06 1.26.07 1.65.07 4.9s-.01 3.64-.07 4.9c-.15 3.22-1.67 4.77-4.92 4.92-1.26.06-1.65.07-4.9.07s-3.64-.01-4.9-.07c-3.22-.15-4.77-1.67-4.92-4.92C2.2 15.64 2.2 15.25 2.2 12s.01-3.64.07-4.9C2.42 3.88 3.94 2.35 7.18 2.2 8.44 2.14 8.83 2.13 12 2.13V2.2zM12 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 16 12a4 4 0 0 1-4 4zm6.41-11.84a1.44 1.44 0 1 0 1.44 1.44 1.44 1.44 0 0 0-1.44-1.44z"/>
           </svg>
         </a>
-
         <a class="interactive-object social-icon tiktok" data-type="social" data-platform="tiktok" data-name="TIKTOK" aria-label="TikTok" style="position:relative;left:60px;top:-65px;margin-bottom:20px">
-          <!-- TikTok SVG -->
           <svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true">
             <path d="M19.6 6.7a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 1 1-2.89-2.89c.31 0 .6.05.88.13V9.4c-.29-.03-.59-.05-.88-.05A6.33 6.33 0 1 0 16 15.67v-7a8.16 8.16 0 0 0 4.77 1.52V6.79c-.34-.03-.76-.08-1.17-.09z"/>
           </svg>
         </a>
-
         <a class="interactive-object social-icon linkedin" data-type="social" data-platform="linkedin" data-name="LINKEDIN" aria-label="LinkedIn" style="position:relative;left:120px;top:-130px;margin-bottom:20px">
-          <!-- LinkedIn SVG -->
           <svg width="24" height="24" viewBox="0 0 24 24" fill="white" aria-hidden="true">
             <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433A2.063 2.063 0 1 1 7.4 5.368a2.063 2.063 0 0 1-2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452z"/>
           </svg>
@@ -248,6 +248,7 @@
 
     <!-- Dialogue -->
     <div class="dialogue-box" id="dialogueBox">
+      <button class="dialogue-close" onclick="closeDialogue()">×</button>
       <div class="dialogue-text" id="dialogueText"></div>
       <div class="dialogue-options" id="dialogueOptions"></div>
     </div>
@@ -261,14 +262,13 @@
         <div class="cv-header">
           <img src="IMG_8843.jpg" alt="Ali Khaqan" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #4169E1;margin-bottom:10px;">
           <h1>Ali Khaqan</h1>
-          <h2>Strategic Assistant to the CEO | ESG, AI & Analytics</h2>
+          <h2>Strategic Management | ESG, AI & Analytics</h2>
           <p>📧 <a href="mailto:alikhaqan22@gmail.com">alikhaqan22@gmail.com</a> | 📱 +49 176 7619 4593 | 📍 Künzelsau, Germany</p>
           <p>🌐 LinkedIn: <a href="https://www.linkedin.com/in/ali-khaqan/" target="_blank" rel="noopener">linkedin.com/in/ali-khaqan</a> | 📸 Instagram: <a href="https://instagram.com/itsalikhaqan" target="_blank" rel="noopener">@itsalikhaqan</a> | 🎵 TikTok: <a href="https://tiktok.com/@itsalikhaqan" target="_blank" rel="noopener">@itsalikhaqan</a></p>
           <p><strong>Status:</strong> Pakistani with German PR (Niederlassungserlaubnis)</p>
           <p><strong>Languages:</strong> English (Fluent), German (B1 — improving thanks to my wife, a native German speaker)</p>
           <p><a href="Ali_CV_2025.pdf" download>⬇️ Download full CV (PDF)</a></p>
         </div>
-
         <div class="cv-section">
           <h3>🎯 Professional Summary</h3>
           <p>I work at the crossroads of ESG, AI, and compliance — helping connect big-picture strategy with execution in manufacturing and automotive electronics. My focus is on turning complex challenges into clear results, building strong teams, and driving sustainable growth. Outside of work, I share my journey as an international living in Germany — from gym routines to daily habits — showing how discipline, balance, and consistency shape both professional and personal success.</p>
@@ -291,7 +291,6 @@
   </div>
 
 <script>
-/* ====================== GAME STATE ====================== */
 let gameState = {
   character: { x:300, y:500, speed:5 },
   camera: { x:0, y:0 },
@@ -302,12 +301,10 @@ let gameState = {
   coins:0
 };
 
-/* ====================== INIT ====================== */
 document.addEventListener('DOMContentLoaded', () => {
   gameState.screen.width = window.innerWidth;
   gameState.screen.height = window.innerHeight;
 
-  // Inputs
   document.addEventListener('keydown', handleKeyDown);
   document.addEventListener('keyup', handleKeyUp);
   document.getElementById('menuBtn').addEventListener('click', showMenu);
@@ -317,23 +314,19 @@ document.addEventListener('DOMContentLoaded', () => {
     gameState.screen.height = window.innerHeight;
   });
 
-  // Mobile
   document.querySelectorAll('.mobile-btn').forEach(btn=>{
     btn.addEventListener('touchstart', handleMobileInput);
     btn.addEventListener('mousedown', handleMobileInput);
   });
 
-  // Interactive objects
   document.querySelectorAll('.interactive-object').forEach(obj=>{
     obj.addEventListener('click', handleObjectClick);
   });
 
-  // Start loop
   updateCamera();
   requestAnimationFrame(gameLoop);
 });
 
-/* ====================== INPUT ====================== */
 function handleKeyDown(e){
   gameState.keys[e.key] = true;
   if(e.key==='Escape') closeAllModals();
@@ -345,7 +338,6 @@ function handleMobileInput(e){
   moveCharacter(dir);
 }
 
-/* ====================== MOVEMENT ====================== */
 function updateCharacter(){
   if (gameState.dialogueActive) return;
 
@@ -392,7 +384,6 @@ function updateCamera(){
   document.getElementById('gameWorld').style.transform = `translate(-${gameState.camera.x}px, -${gameState.camera.y}px)`;
 }
 
-/* ====================== UTILS ====================== */
 function rect(el){ return el.getBoundingClientRect(); }
 function isOverlapById(id, el2){
   const r1 = rect(document.getElementById(id));
@@ -400,15 +391,12 @@ function isOverlapById(id, el2){
   return !(r1.right<r2.left || r1.left>r2.right || r1.bottom<r2.top || r1.top>r2.bottom);
 }
 
-/* ====================== INTERACTION ====================== */
 function handleObjectClick(e){
   const obj = e.currentTarget;
   const type = obj.dataset.type;
 
-  // Always allow About to open (no distance gating)
   if (type === 'about') { openModal('aboutModal'); return; }
 
-  // Proximity for others
   const a = rect(obj), b = rect(document.getElementById('character'));
   const distance = Math.hypot(a.left - b.left, a.top - b.top);
   if (distance > 150 && type!=='about') {
@@ -420,7 +408,6 @@ function handleObjectClick(e){
   if (type==='social') handleSocialClick(obj.dataset.platform);
 }
 
-/* ====================== DIALOGUES/MODALS ====================== */
 function showDialogue(text, options=[]){
   gameState.dialogueActive = true;
   document.getElementById('dialogueText').innerHTML = text;
@@ -462,7 +449,8 @@ function showMenu(){
       {text:"Instagram", action:()=>{handleSocialClick('instagram');}},
       {text:"TikTok", action:()=>{handleSocialClick('tiktok');}},
       {text:"LinkedIn", action:()=>{handleSocialClick('linkedin');}}
-    ])}}
+    ])}},
+    {text:"Close Menu", action:closeDialogue}
   ]);
 }
 function showHelp(){
@@ -489,7 +477,6 @@ function hideControls(hide){
   }
 }
 
-/* ====================== COINS ====================== */
 function checkCoinPickup(){
   const coins = Array.from(document.querySelectorAll('.coin'));
   coins.forEach(coin=>{
@@ -502,7 +489,6 @@ function checkCoinPickup(){
   });
 }
 
-/* ====================== LOOP ====================== */
 function gameLoop(){ updateCharacter(); requestAnimationFrame(gameLoop); }
 </script>
 </body>

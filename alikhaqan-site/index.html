@@ -19,11 +19,12 @@
   @keyframes cloudFloat{0%{transform:translateX(0)}100%{transform:translateX(-100px)}}
 
   /* Blocks / pipes / bushes / trees (solid) */
-  .brick-block,.pipe,.bush,.mario-tree,.tree,.goomba{pointer-events:none}
+  .brick-block,.pipe,.bush,.mario-tree,.tree{pointer-events:none}
   .brick-block{position:absolute;width:40px;height:40px;background:#D2691E;border:2px solid #8B4513;
     background-image:linear-gradient(45deg,#CD853F 25%,transparent 25%),linear-gradient(-45deg,#CD853F 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#CD853F 75%),linear-gradient(-45deg,transparent 75%,#CD853F 75%);
     background-size:8px 8px}
   .question-block{position:absolute;width:40px;height:40px;background:#FFD700;border:2px solid #FFA500;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#FF8C00;animation:questionPulse 1.5s ease-in-out infinite}
+  .question-block.interactive-object{pointer-events:auto;cursor:pointer;filter:drop-shadow(0 0 10px rgba(255,255,255,.6))}
   @keyframes questionPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
   .pipe{position:absolute;background:#228B22;border:3px solid #006400;border-radius:15px 15px 0 0}
   .pipe-small{width:60px;height:80px}.pipe-medium{width:60px;height:120px}.pipe-large{width:60px;height:160px}
@@ -38,7 +39,7 @@
   @keyframes coinSpin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
 
   /* Goombas (hazard) */
-  .goomba{position:absolute;width:30px;height:30px;background:#8B4513;border-radius:50% 50% 0 0;border:2px solid #654321;animation:goombaWalk 3s ease-in-out infinite}
+  .goomba{position:absolute;width:30px;height:30px;background:#8B4513;border-radius:50% 50% 0 0;border:2px solid #654321;animation:goombaWalk 3s ease-in-out infinite;pointer-events:none}
   .goomba::before{content:'• •';position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#000}
   @keyframes goombaWalk{0%,100%{transform:translateX(0)}50%{transform:translateX(20px)}}
 
@@ -117,12 +118,11 @@
     .ui-header{top:calc(10px + env(safe-area-inset-top));left:12px;max-width:70vw}
     .ui-title{font-size:1.3rem}
     .ui-subtitle{font-size:.95rem}
-    /* Move MENU/HELP to bottom-right to avoid overlap with D-pad */
     .menu-buttons{
       top:auto;right:16px;left:auto;
       bottom:calc(16px + env(safe-area-inset-bottom));
       transform:none;gap:10px;z-index:1002;
-      flex-direction:column; /* stack vertically */
+      flex-direction:column;
     }
     .menu-btn{font-size:1rem;padding:12px 14px}
     .hud{top:calc(10px + env(safe-area-inset-top));right:12px;left:auto;transform:none}
@@ -139,15 +139,20 @@
       <!-- clouds -->
       <div class="cloud cloud1"></div><div class="cloud cloud2"></div><div class="cloud cloud3"></div><div class="cloud cloud4"></div>
 
-      <!-- blocks -->
+      <!-- blocks row -->
       <div class="brick-block" style="left:200px;top:400px"></div>
       <div class="brick-block" style="left:240px;top:400px"></div>
       <div class="brick-block" style="left:280px;top:400px"></div>
-      <div class="question-block" style="left:320px;top:360px">?</div>
+
+      <!-- fun fact 1 -->
+      <div class="question-block interactive-object" data-type="fun" data-fact="1" style="left:320px;top:360px">?</div>
+
       <div class="brick-block" style="left:360px;top:400px"></div>
 
+      <!-- second group -->
       <div class="brick-block" style="left:800px;top:500px"></div>
-      <div class="question-block" style="left:840px;top:460px">?</div>
+      <!-- fun fact 2 -->
+      <div class="question-block interactive-object" data-type="fun" data-fact="2" style="left:840px;top:460px">?</div>
       <div class="brick-block" style="left:880px;top:500px"></div>
 
       <!-- pipes -->
@@ -371,52 +376,67 @@ function handleKeyDown(e){
 }
 function handleKeyUp(e){ gameState.keys[e.key] = false; }
 
-/* ====================== MOVEMENT ====================== */
+/* ====================== COLLISION HELPERS ====================== */
+function rect(el){ return el.getBoundingClientRect(); }
+function isOverlapById(id, el2){
+  const r1 = rect(document.getElementById(id));
+  const r2 = rect(el2);
+  return !(r1.right<r2.left || r1.left>r2.right || r1.bottom<r2.top || r1.top>r2.bottom);
+}
+function collidesWithSolids(){
+  const solids = document.querySelectorAll('.pipe,.brick-block,.bush,.mario-tree,.tree,.goomba');
+  for (const el of solids){ if (isOverlapById('character', el)) return true; }
+  return false;
+}
+
+/* ====================== MOVEMENT (axis-separated) ====================== */
+function applyAxisMovement(dx, dy){
+  const c = gameState.character;
+  const oldX = c.x, oldY = c.y;
+
+  // move X first
+  c.x = Math.min(gameState.world.width-40, Math.max(0, c.x + dx));
+  updateCharacterPosition();
+  if (collidesWithSolids()){ c.x = oldX; updateCharacterPosition(); }
+
+  // then move Y
+  c.y = Math.min(gameState.world.height-48, Math.max(0, c.y + dy));
+  updateCharacterPosition();
+  if (collidesWithSolids()){ c.y = oldY; updateCharacterPosition(); }
+
+  updateCamera();
+  checkHazard();
+  checkCoinPickup();
+}
+
 function updateCharacter(){
   if (gameState.dialogueActive) return;
 
-  const c = gameState.character;
-  const prev = {x:c.x, y:c.y};
+  let dx = 0, dy = 0;
+  const s = gameState.character.speed;
 
-  if (gameState.keys['ArrowLeft']||gameState.keys['a']||gameState.keys['A']) c.x = Math.max(0, c.x - c.speed);
-  if (gameState.keys['ArrowRight']||gameState.keys['d']||gameState.keys['D']) c.x = Math.min(gameState.world.width-40, c.x + c.speed);
-  if (gameState.keys['ArrowUp']||gameState.keys['w']||gameState.keys['W']) c.y = Math.max(0, c.y - c.speed);
-  if (gameState.keys['ArrowDown']||gameState.keys['s']||gameState.keys['S']) c.y = Math.min(gameState.world.height-48, c.y + c.speed);
+  if (gameState.keys['ArrowLeft']||gameState.keys['a']||gameState.keys['A']) dx -= s;
+  if (gameState.keys['ArrowRight']||gameState.keys['d']||gameState.keys['D']) dx += s;
+  if (gameState.keys['ArrowUp']||gameState.keys['w']||gameState.keys['W']) dy -= s;
+  if (gameState.keys['ArrowDown']||gameState.keys['s']||gameState.keys['S']) dy += s;
 
-  // Solid collision rollback
-  const solids = Array.from(document.querySelectorAll('.pipe,.brick-block,.bush,.mario-tree,.tree,.goomba'));
-  if (solids.some(el => isOverlapById('character', el))) { c.x = prev.x; c.y = prev.y; }
-
-  updateCharacterPosition();
-  updateCamera();
-
-  // Interactions
-  checkCoinPickup();
-  checkHazard(); // <- goombas
+  if (dx||dy) applyAxisMovement(dx, dy);
 }
 
 function moveCharacter(direction, isHold=false){
   if (gameState.dialogueActive) return;
 
-  const c = gameState.character;
-  const step = (isHold ? c.speed*2.2 : c.speed*1.6);  // snappier on mobile hold
-  const prev = {x:c.x, y:c.y};
+  const step = (isHold ? gameState.character.speed*2.2 : gameState.character.speed*1.6);
+  let dx=0, dy=0;
+  if(direction==='left')  dx -= step;
+  if(direction==='right') dx += step;
+  if(direction==='up')    dy -= step;
+  if(direction==='down')  dy += step;
 
-  if(direction==='left')  c.x = Math.max(0, c.x - step);
-  if(direction==='right') c.x = Math.min(gameState.world.width - 40, c.x + step);
-  if(direction==='up')    c.y = Math.max(0, c.y - step);
-  if(direction==='down')  c.y = Math.min(gameState.world.height - 48, c.y + step);
-
-  const solids = Array.from(document.querySelectorAll('.pipe,.brick-block,.bush,.mario-tree,.tree,.goomba'));
-  if (solids.some(el => isOverlapById('character', el))) { c.x = prev.x; c.y = prev.y; }
-
-  updateCharacterPosition();
-  updateCamera();
-
-  checkHazard(); // also detect hazards during mobile holds
+  applyAxisMovement(dx, dy);
 }
 
-/* ====================== CAMERA & COLLISION UTILS ====================== */
+/* ====================== CAMERA & POSITION ====================== */
 function updateCharacterPosition(){
   const el = document.getElementById('character');
   el.style.left = gameState.character.x + 'px';
@@ -428,12 +448,6 @@ function updateCamera(){
   gameState.camera.y = Math.max(0, Math.min(gameState.world.height - s.height, c.y - s.height/2));
   document.getElementById('gameWorld').style.transform = `translate(-${gameState.camera.x}px, -${gameState.camera.y}px)`;
 }
-function rect(el){ return el.getBoundingClientRect(); }
-function isOverlapById(id, el2){
-  const r1 = rect(document.getElementById(id));
-  const r2 = rect(el2);
-  return !(r1.right<r2.left || r1.left>r2.right || r1.bottom<r2.top || r1.top>r2.bottom);
-}
 
 /* ====================== INTERACTION ====================== */
 function handleObjectClick(e){
@@ -442,7 +456,7 @@ function handleObjectClick(e){
 
   if (type === 'about') { openModal('aboutModal'); return; }
 
-  // distance gate for other interactions
+  // proximity gate (except about)
   const a = rect(obj), b = rect(document.getElementById('character'));
   const distance = Math.hypot(a.left - b.left, a.top - b.top);
   if (distance > 150 && type!=='about') {
@@ -452,6 +466,7 @@ function handleObjectClick(e){
 
   if (type==='cv') openModal('cvModal');
   if (type==='social') handleSocialClick(obj.dataset.platform);
+  if (type==='fun')   showFunFact(obj.dataset.fact);
 }
 
 /* ====================== DIALOGUES/MODALS ====================== */
@@ -501,7 +516,7 @@ function showMenu(){
   ]);
 }
 function showHelp(){
-  showDialogue("🎮 HOW TO PLAY:<br><br>• Use arrow keys or mobile controls to move<br>• Click objects when you're close<br>• 💻 Computer = CV/Resume<br>• 🌳 Tree = About Ali<br>• 📱 Icons = My socials<br><br>Collect coins, avoid brown enemies!");
+  showDialogue("🎮 HOW TO PLAY:<br><br>• Use arrow keys or mobile controls to move<br>• Click objects when you're close<br>• 💻 Computer = CV/Resume<br>• ❓ Yellow blocks = fun facts<br>• 🌳 Tree = About Ali<br>• 📱 Icons = My socials<br><br>Collect coins and avoid brown enemies!");
 }
 function handleSocialClick(platform){
   const urls = {
@@ -522,6 +537,15 @@ function hideControls(hide){
     if (window.innerWidth<=768) m.style.display='block';
     c.style.visibility='visible';
   }
+}
+
+/* ====================== FUN FACTS ====================== */
+function showFunFact(id){
+  const facts = {
+    "1": "🌍 Born in <b>Pakistan</b>; studied and worked across <b>Turkey, Germany, the USA, and India</b> — collecting visas like Pokémon and projects like side quests.",
+    "2": "🏋️‍♂️ I <b>powerlift</b> and stay unusually calm when things get messy — barbells or business. Deep breaths, heavier sets, better decisions."
+  };
+  showDialogue(facts[id] || "Fun fact coming soon!");
 }
 
 /* ====================== COINS & HAZARDS ====================== */
@@ -547,7 +571,6 @@ function checkHazard(){
 function loseAndRestart(){
   showDialogue("☠️ Oops! You bumped into a Goomba.<br><br>Restart from the beginning?",[
     {text:"Restart", action:()=>{
-      // move back to original position (keep coins as requested)
       gameState.character.x = START_POS.x;
       gameState.character.y = START_POS.y;
       updateCharacterPosition();
